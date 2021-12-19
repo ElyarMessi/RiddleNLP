@@ -26,8 +26,8 @@ def get_time_dif(start_time):
 
 def train(config: Config):
     start_time = time.time()
-    train_dataset = Data_set('data/train.csv', 'data/wiki_info_v2.json', is_test=False)
-    val_dataset = Data_set('data/val.csv', 'data/wiki_info_v2.json', is_test=False)
+    train_dataset = Data_set('data/train.csv', 'data/wiki_info_v2.json', config=config, is_test=False)
+    val_dataset = Data_set('data/val.csv', 'data/wiki_info_v2.json', config=config, is_test=False)
     train_loader = DataLoader(dataset=train_dataset, shuffle=True, batch_size=config.batch_size)
     val_loader = DataLoader(dataset=val_dataset, shuffle=True, batch_size=config.batch_size)
     print(train_dataset.error_line)
@@ -38,7 +38,7 @@ def train(config: Config):
     model.cuda()
     model.train()
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
-    loss_f = nn.CrossEntropyLoss(weight=torch.FloatTensor([1, 4]).cuda())
+    loss_f = nn.CrossEntropyLoss()
 
     # iter setting
     total_batch = 1
@@ -54,8 +54,8 @@ def train(config: Config):
     for epoch in range(config.epoch_num):
         print('Epoch [{}/{}]'.format(epoch + 1, config.epoch_num))
         # scheduler.step() # 学习率衰减
-        for i, (x, labels) in tqdm(enumerate(train_loader), desc="Training Process"):
-            probs = model(x)
+        for i, (riddle, riddle_attention, choices, choices_attention, labels) in tqdm(enumerate(train_loader), desc="Training Process"):
+            probs = model(riddle, riddle_attention, choices, choices_attention)
             model.zero_grad()
             labels = torch.LongTensor(labels).cuda()
             loss = loss_f(probs, labels)
@@ -108,8 +108,8 @@ def evaluate(config: Config, model, data_iter, test=False):
     labels_all = np.array([], dtype=int)
     loss_f = nn.CrossEntropyLoss()
     with torch.no_grad():
-        for x, labels in data_iter:
-            probs = model(x)
+        for riddle, riddle_attention, choices, choices_attention, labels in data_iter:
+            probs = model(riddle, riddle_attention, choices, choices_attention)
             labels = torch.LongTensor(labels).cuda()
             loss = loss_f(probs, labels)
             loss_total += loss

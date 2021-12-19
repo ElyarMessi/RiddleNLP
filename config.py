@@ -17,13 +17,19 @@ from dataclasses import dataclass
 class Config:
     # train
     epoch_num: int = 5
-    learning_rate: float = 1e-6
-    report_step: int = 500
+    learning_rate: float = 2e-5
+    report_step: int = 200
     require_improvement: int = 10000
-    batch_size: int = 8
+    batch_size: int = 4
+
+    # task
+    choice_num: int = 5
 
     # model
     dropout: float = 0.5
+    riddle_max_len: int = 32
+    choice_max_len: int = 128
+    hidden_size: int = 256
 
     # I/O
     log_dir: str = "result/train/demo/log"
