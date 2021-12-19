@@ -33,3 +33,12 @@ bert输入直接去pool过后的结果接上两个全连接层
 写了个train的初步，把取数据那块给写上了
 
 后续补充loss，optimizer啥的
+
+
+### Explore
+#### 1 binary classification * 5
+```text
+[CLS] + [TIP_TOKEN1, TIP_TOKEN2, ...] + [FACE_TOKEN1, FACE_TOKEN2, ...] + [SEP] + [CAN_TOKEN1, CAN_TOKEN2, ...] + [WIKI_TOKEN1, WIKI_TOKEN2]
+```
+Unbalanced Label: Led to all-false prediction.
+

@@ -11,7 +11,7 @@ class Data_set(Dataset):
         self.is_test = is_test
         self.wiki_data = {}
         self.error_line = 0 # csv错误行
-        self.tokenizer = BertTokenizer.from_pretrained('chinese-bert-wwm-ext')
+        self.tokenizer = BertTokenizer.from_pretrained('hfl/chinese-bert-wwm-ext')
 
         with open(wiki_filename,'r',encoding='utf-8') as file:
             self.wiki_data = json.load(file)
@@ -35,6 +35,7 @@ class Data_set(Dataset):
                 # 提示（打一···）
                 tip = riddle_string[l_ + 1:r_]
                 if not is_test:
+                    # 正确的答案是term[label+1]
                     label = int(terms[6])
 
                 # x_list的数据格式为：（谜语，提示，候选项，候选项的wiki解释）
@@ -52,10 +53,10 @@ class Data_set(Dataset):
     def __getitem__(self, item):
         # if self.is_test:
         #     return self.x_list[item], None
-        print(type(self.x_list[item]))
+        # print(type(self.x_list[item]))
         riddle,tip,ans,ans_wiki = self.x_list[item]
-        print(riddle)
-        print(tip)
+        # print(riddle)
+        # print(tip)
         if not self.is_test:
             label = self.y_list[item]
         else:
@@ -69,9 +70,9 @@ class Data_set(Dataset):
         bert_input = self.tokenizer.encode_plus(tip+riddle,ans+ans_wiki,add_special_tokens=True,
                                                 padding='max_length',max_length=256,truncation='only_second')
 
-        input_ids = torch.tensor(bert_input['input_ids'])
-        token_type_ids = torch.tensor(bert_input['token_type_ids'])
-        attention_mask = torch.tensor(bert_input['attention_mask'])
+        input_ids = torch.tensor(bert_input['input_ids']).cuda()
+        token_type_ids = torch.tensor(bert_input['token_type_ids']).cuda()
+        attention_mask = torch.tensor(bert_input['attention_mask']).cuda()
 
         return (input_ids, token_type_ids, attention_mask), label
 

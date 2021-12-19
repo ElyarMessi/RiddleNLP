@@ -1,2 +1,9 @@
+.idea
+.vscode
+*.DS_Store
+
+*__pycache__
+
+
 /data/
 /chinese-bert-wwm-ext/
