@@ -29,9 +29,11 @@ class Data_set(Dataset):
                     continue
                 if is_test and line.count(',') != 5:
                     self.error_line += 1
-                    continue
-
-                terms = line.split(',')
+                    raw_terms = line.strip().split(',')
+                    terms = [raw_terms[0], raw_terms[1] + ',' + raw_terms[2], raw_terms[3], raw_terms[4], raw_terms[5], raw_terms[6]]
+                    self.eterms = terms
+                else:
+                    terms = line.strip().split(',')
                 riddle_string = terms[0]
                 l_ = riddle_string.find('（')
                 r_ = riddle_string.find('）')
@@ -97,6 +99,7 @@ class Data_set(Dataset):
         #     return self.x_list[item], None
         # print(type(self.x_list[item]))
         riddle, tip, ans, ans_wiki = self.x_list[item]
+
         # X = self.x_list[item]  # input_ids, token_type_ids, attention_mask
         bert_input = self.tokenizer.encode_plus(tip + riddle, ans + ans_wiki,
                                                 add_special_tokens=True,
@@ -113,7 +116,7 @@ class Data_set(Dataset):
         if not self.is_test:
             label = self.y_list[item]
         else:
-            label = None
+            label = -1
 
         # --------------------------------------------------------------------------------------------
         # 重点调整区域
