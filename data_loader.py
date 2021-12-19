@@ -46,48 +46,48 @@ class Data_set(Dataset):
                 # x_list的数据格式为：（谜语，提示，候选项，候选项的wiki解释）
                 # 二分类
                 # --------------------------------------------------------------------------------------------
-        #         for i in range(1, 6):
-        #             self.x_list.append([riddle_, tip, terms[i], self.wiki_data.get(terms[i], 0)])
-        #             if not is_test:
-        #                 if i - 1 == label:
-        #                     self.y_list.append(1)
-        #                     self.n_positive += 1
-        #                 else:
-        #                     self.y_list.append(0)
-        #                     self.n_negative += 1
-        #
-        # if self.n_negative == self.n_positive:
-        #     self.is_unbalance = True
-        # else:
-        #     self.is_unbalance = False
-
-                # --------------------------------------------------------------------------------------------
-                # x_list的数据格式为：（谜语，提示，候选项，候选项的wiki解释）
-                # 多分类?
-                # --------------------------------------------------------------------------------------------
-                sample = []
-                sample_ans = []
                 for i in range(1, 6):
-                    bert_input = self.tokenizer.encode_plus(tip + riddle_, terms[i] + self.wiki_data.get(terms[i], 0),
-                                                            add_special_tokens=True,
-                                                            padding='max_length',
-                                                            max_length=256,
-                                                            truncation='only_second')
-
-                    input_ids = torch.tensor(bert_input['input_ids'])
-                    token_type_ids = torch.tensor(bert_input['token_type_ids'])
-                    attention_mask = torch.tensor(bert_input['attention_mask'])
-                    sample.append([input_ids, token_type_ids, attention_mask])
+                    self.x_list.append([riddle_, tip, terms[i], self.wiki_data.get(terms[i], 0)])
                     if not is_test:
                         if i - 1 == label:
-                            sample_ans.append(1)
+                            self.y_list.append(1.)
                             self.n_positive += 1
                         else:
-                            sample_ans.append(0)
+                            self.y_list.append(0.)
                             self.n_negative += 1
-                sample_ans = torch.FloatTensor(sample_ans)
-                self.x_list.append(sample)
-                self.y_list.append(sample_ans)
+
+        if self.n_negative == self.n_positive:
+            self.is_unbalance = True
+        else:
+            self.is_unbalance = False
+
+            # --------------------------------------------------------------------------------------------
+            # x_list的数据格式为：（谜语，提示，候选项，候选项的wiki解释）
+            # 多分类?
+            # --------------------------------------------------------------------------------------------
+            # sample = []
+            # sample_ans = []
+            # for i in range(1, 6):
+            #     bert_input = self.tokenizer.encode_plus(tip + riddle_, terms[i] + self.wiki_data.get(terms[i], 0),
+            #                                             add_special_tokens=True,
+            #                                             padding='max_length',
+            #                                             max_length=256,
+            #                                             truncation='only_second')
+            #
+            #     input_ids = torch.tensor(bert_input['input_ids'])
+            #     token_type_ids = torch.tensor(bert_input['token_type_ids'])
+            #     attention_mask = torch.tensor(bert_input['attention_mask'])
+            #     sample.append([input_ids, token_type_ids, attention_mask])
+            #     if not is_test:
+            #         if i - 1 == label:
+            #             sample_ans.append(1)
+            #             self.n_positive += 1
+            #         else:
+            #             sample_ans.append(0)
+            #             self.n_negative += 1
+            # sample_ans = torch.FloatTensor(sample_ans)
+            # self.x_list.append(sample)
+            # self.y_list.append(sample_ans)
 
     def __len__(self):
         return len(self.x_list)
@@ -99,12 +99,13 @@ class Data_set(Dataset):
         riddle, tip, ans, ans_wiki = self.x_list[item]
         # X = self.x_list[item]  # input_ids, token_type_ids, attention_mask
         bert_input = self.tokenizer.encode_plus(tip + riddle, ans + ans_wiki,
-                                                    add_special_tokens=True,
-                                                    padding='max_length',
-                                                    max_length=256,
-                                                    truncation='only_second')
+                                                add_special_tokens=True,
+                                                padding='max_length',
+                                                max_length=256,
+                                                truncation='only_second')
 
         input_ids = torch.tensor(bert_input['input_ids'])
+        de = self.tokenizer.decode(input_ids)
         token_type_ids = torch.tensor(bert_input['token_type_ids'])
         attention_mask = torch.tensor(bert_input['attention_mask'])
         # print(riddle)
